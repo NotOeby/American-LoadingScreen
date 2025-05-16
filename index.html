@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Loading Screen - Serveur GMod</title>
+<style>
+  /* Reset and base */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body, html {
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #eee;
+    overflow: hidden;
+    background-color: #111;
+  }
+
+  /* Background container */
+  #background-container {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    z-index: -1;
+  }
+
+  .bg-image {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 110vw;
+    height: 110vh;
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    filter: blur(8px) brightness(0.6);
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+  }
+  .bg-image.active {
+    opacity: 1;
+  }
+  
+  /* Overlay container */
+  #overlay {
+    position: relative;
+    z-index: 1;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    padding: 30px;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: saturate(180%) blur(10px);
+  }
+
+  /* Server name */
+  #server-name {
+    font-size: 3.5rem;
+    font-weight: 900;
+    text-align: center;
+    letter-spacing: 3px;
+    text-shadow: 0 0 20px #40c4ff, 0 0 40px #40c4ff, 0 0 60px #40c4ff;
+    user-select: none;
+  }
+
+  /* Main content flexbox for staff and rules */
+  #main-content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+
+  /* Staff and rules boxes */
+  .info-box {
+    background: rgba(30, 30, 30, 0.7);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(64,196,255,0.7);
+    padding: 25px;
+    width: 320px;
+    max-height: 70vh;
+    color: #ccecff;
+    overflow-y: auto;
+    user-select: none;
+  }
+  .info-box h2 {
+    font-size: 1.8rem;
+    margin-bottom: 18px;
+    border-bottom: 2px solid #40c4ff;
+    padding-bottom: 8px;
+  }
+  .info-box ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  /* Staff list styling */
+  #staff-list li {
+    margin-bottom: 10px;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  #staff-list li span {
+    color: #3af;
+    font-weight: 700;
+  }
+  /* Rules list styling with custom bullet */
+  #rules-list li {
+    margin-bottom: 14px;
+    line-height: 1.4;
+    font-size: 1rem;
+    padding-left: 14px;
+    position: relative;
+  }
+  #rules-list li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #40c4ff;
+    font-weight: bold;
+  }
+
+  /* Loading bar container */
+  #loading-container {
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto 10px auto;
+  }
+
+  #loading-bar {
+    width: 100%;
+    height: 20px;
+    background: rgba(64, 196, 255, 0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px #40c4ff88;
+  }
+  #loading-progress {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #40c4ff, #3af);
+    border-radius: 20px 0 0 20px;
+    transition: width 0.3s ease;
+    box-shadow: 0 0 12px #3af, 0 0 26px #40c4ff;
+  }
+
+  #loading-text {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    text-align: center;
+    letter-spacing: 0.1em;
+    user-select: none;
+  }
+
+  /* Scrollbar for info boxes */
+  .info-box::-webkit-scrollbar {
+    width: 8px;
+  }
+  .info-box::-webkit-scrollbar-thumb {
+    background-color: #40c4ffaa;
+    border-radius: 6px;
+  }
+  .info-box::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.05);
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    #main-content {
+      flex-direction: column;
+      align-items: center;
+    }
+    .info-box {
+      max-height: 40vh;
+      width: 90vw;
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="background-container">
+    <img src="https://i.imgur.com/6cdHmgX.jpeg" alt="Background 1" class="bg-image active" />
+    <img src="https://i.imgur.com/MSgZ79W.jpeg" alt="Background 2" class="bg-image" />
+    <img src="https://imgur.com/YwlPIS5" alt="Background 3" class="bg-image" />
+    <img src="https://i.imgur.com/LQASDJW.jpeg" alt="Background 4" class="bg-image" />
+  </div>
+
+  <div id="overlay">
+    <div id="server-name" aria-label="Nom du serveur">AmericanLife</div>
+
+    <div id="main-content">
+      <section class="info-box" aria-label="Staff du serveur">
+        <h2>Staff</h2>
+        <ul id="staff-list">
+          <li><span>Fondateur:</span> Strooper44</li>
+          <li><span>Fondatrice:</span> Ashley miller's</li>
+          <li><span>CoFondateur:</span> NotOeby</li>
+          <li><span>SuperAdmin:</span> Azelekk</li>
+        </ul>
+      </section>
+
+      <section class="info-box" aria-label="Reglement du serveur">
+        <h2>Règlement</h2>
+        <ul id="rules-list">
+          <li>Respecter tous les joueurs et le staff.</li>
+          <li>Pas de triche, hacks ou exploits.</li>
+          <li>Pas de publicité sans autorisation.</li>
+          <li>Utiliser un langage approprié.</li>
+          <li>Suivre les directives données par le staff.</li>
+        </ul>
+      </section>
+    </div>
+
+    <div id="loading-container" aria-label="Chargement en cours">
+      <div id="loading-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="loading-progress"></div>
+      </div>
+      <div id="loading-text">Chargement...</div>
+    </div>
+  </div>
+
+  <script>
+    // Background slideshow logic
+    const bgImages = document.querySelectorAll('.bg-image');
+    let currentIndex = 0;
+    const totalImages = bgImages.length;
+
+    function changeBackground() {
+      bgImages[currentIndex].classList.remove('active');
+      currentIndex = (currentIndex + 1) % totalImages;
+      bgImages[currentIndex].classList.add('active');
+    }
+
+    setInterval(changeBackground, 8000);
+
+    // Loading progress simulation
+    const progressBar = document.getElementById('loading-progress');
+    const loadingText = document.getElementById('loading-text');
+    let progress = 0;
+
+    function simulateLoading() {
+      if(progress < 100){
+        progress += Math.random() * 5;
+        if(progress > 100) progress = 100;
+        progressBar.style.width = progress + '%';
+        progressBar.setAttribute('aria-valuenow', Math.floor(progress));
+        if(progress < 100){
+          loadingText.textContent = "Chargement... " + Math.floor(progress) + "%";
+          setTimeout(simulateLoading, 300);
+        } else {
+          loadingText.textContent = "Prêt !";
+        }
+      }
+    }
+    simulateLoading();
+  </script>
+</body>
+</html>
+
